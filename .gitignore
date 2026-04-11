@@ -14,6 +14,7 @@ venv/
 coverage/
 .coverage
 htmlcov/
+*.tsbuildinfo
 *.db
 *.sqlite
 .DS_Store
