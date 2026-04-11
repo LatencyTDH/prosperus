@@ -2,6 +2,15 @@
 
 LLM Observability platform for monitoring, troubleshooting, and evaluating LLM-powered applications.
 
+## Table of Contents
+
+- [Overview](#overview)
+- [Quick Start](#quick-start)
+- [Development](#development)
+- [Architecture](#architecture)
+- [Span Kinds](#span-kinds)
+- [Environment Variables](#environment-variables)
+
 ## Overview
 
 Prosperus collects traces, spans, evaluations, and metrics from your LLM applications. It consists of three packages:

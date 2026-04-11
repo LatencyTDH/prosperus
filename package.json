@@ -9,10 +9,27 @@
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
     "format": "pnpm -r format",
-    "test": "pnpm -r test"
+    "test": "pnpm -r test",
+    "prepare": "husky"
   },
   "engines": {
     "node": ">=20",
     "pnpm": ">=9"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0"
+  },
+  "lint-staged": {
+    "packages/server/src/**/*.ts": [
+      "eslint --fix"
+    ],
+    "packages/web/src/**/*.{ts,tsx}": [
+      "eslint --fix"
+    ],
+    "packages/sdk-python/src/**/*.py": [
+      "ruff check --fix",
+      "ruff format"
+    ]
   }
 }
