@@ -14,7 +14,7 @@ See [README.md](README.md#quick-start) for prerequisites and manual setup steps.
 1. Create a branch from `main`
 2. Run `make start` to get a local environment
 3. Make your changes
-4. Run `make check` (builds, lints, and tests all packages)
+4. Run `make check` (builds, lints, typechecks, and tests all packages)
 5. Open a pull request
 
 ## Code Standards

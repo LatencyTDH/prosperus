@@ -29,6 +29,7 @@ Prosperus collects traces, spans, evaluations, and metrics from your LLM applica
 - pnpm ≥ 9
 - Docker & Docker Compose (for PostgreSQL)
 - Python ≥ 3.9 (for SDK development)
+- uv ≥ 0.8 (for SDK dependency management and commands)
 
 ### Setup
 
@@ -50,6 +51,7 @@ Or run each step manually:
 
 ```bash
 pnpm install
+(cd packages/sdk-python && uv sync --frozen)
 docker compose up postgres -d
 pnpm --filter @prosperus/server db:migrate
 pnpm dev:server   # API
@@ -72,6 +74,9 @@ pnpm build
 # Run all tests
 pnpm test
 
+# Run the canonical local validation suite
+make check
+
 # Lint all packages
 pnpm lint
 
@@ -87,12 +92,13 @@ pnpm dev:web
 
 ```bash
 cd packages/sdk-python
-python -m venv .venv && source .venv/bin/activate
-pip install -e ".[dev]"
-pytest
-ruff check src/
-mypy src/
+uv sync
+uv run pytest
+uv run ruff check src/
+uv run mypy src/
 ```
+
+`make check` runs the repo's canonical local validation flow: build, lint, SDK typecheck, and tests. The SDK commands are executed through `uv run`.
 
 ## Architecture
 

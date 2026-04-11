@@ -1,9 +1,10 @@
-.PHONY: dev build test lint format check setup start stop
+.PHONY: dev build test lint typecheck format check setup start stop
 
 # ── Development ──────────────────────────────────────────────────
 
 setup: ## Install dependencies and start PostgreSQL
 	pnpm install
+	cd packages/sdk-python && VIRTUAL_ENV= uv sync --frozen
 	docker compose up postgres -d
 	@echo "Waiting for PostgreSQL..."
 	@until docker compose exec postgres pg_isready -U prosperus -q 2>/dev/null; do sleep 0.5; done
@@ -29,17 +30,20 @@ build: ## Build all packages
 
 test: ## Run all tests
 	pnpm -r test
-	cd packages/sdk-python && python -m pytest
+	cd packages/sdk-python && VIRTUAL_ENV= uv run pytest
 
 lint: ## Lint all packages
 	pnpm -r lint
-	cd packages/sdk-python && ruff check src/
+	cd packages/sdk-python && VIRTUAL_ENV= uv run ruff check src/
+
+typecheck: ## Run type checks
+	cd packages/sdk-python && VIRTUAL_ENV= uv run mypy src/
 
 format: ## Format all code
 	pnpm -r format
-	cd packages/sdk-python && ruff format src/
+	cd packages/sdk-python && VIRTUAL_ENV= uv run ruff format src/
 
-check: build lint test ## Build, lint, and test everything
+check: build lint typecheck test ## Build, lint, typecheck, and test everything
 
 # ── Database ─────────────────────────────────────────────────────
 

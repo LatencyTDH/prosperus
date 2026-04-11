@@ -25,6 +25,10 @@ class Span:
     become children automatically via context-var propagation.
     """
 
+    span_id: str
+    trace_id: str
+    parent_id: str | None
+
     def __init__(
         self,
         kind: SpanKind,
@@ -38,10 +42,16 @@ class Span:
         trace_id: str | None = None,
         parent_id: str | None = None,
     ) -> None:
-        parent = _active_span.get()
+        parent: Span | None = _active_span.get()
+        parent_trace_id: str | None = None
+        parent_span_id: str | None = None
+        if parent is not None:
+            parent_trace_id = parent.trace_id
+            parent_span_id = parent.span_id
+
         self.span_id = _generate_id()
-        self.trace_id = trace_id or (parent.trace_id if parent else _generate_id())
-        self.parent_id = parent_id or (parent.span_id if parent else None)
+        self.trace_id = trace_id or parent_trace_id or _generate_id()
+        self.parent_id = parent_id or parent_span_id
         self.kind = kind
         self.name = name
         self.app_name = ml_app or app_name

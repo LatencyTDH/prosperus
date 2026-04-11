@@ -5,24 +5,29 @@ The Prosperus Python SDK instruments LLM applications with automatic tracing, sp
 ## Installation
 
 ```bash
-pip install prosperus
+uv add prosperus-sdk
 ```
+
+The package installs as `prosperus-sdk` and is imported as `prosperus`.
 
 For development:
 
 ```bash
 cd packages/sdk-python
-pip install -e ".[dev]"
+uv sync
 ```
 
 ## Quick Start
 
 ```python
-from prosperus import Prosperus
-from prosperus.decorators import workflow, llm
+from prosperus import Prosperus, llm, workflow
 
 # Initialize the client
-ph = Prosperus(api_key="ph-...", app_name="my-chatbot")
+ph = Prosperus(
+    api_key="ph-...",
+    app_name="my-chatbot",
+    endpoint="http://localhost:4100",  # use your local server during development
+)
 ph.enable()
 
 @workflow
@@ -31,8 +36,13 @@ def handle_request(user_msg: str) -> str:
 
 @llm(model_name="gpt-4o", model_provider="openai")
 def call_model(prompt: str) -> str:
-    # Your LLM call here
-    return response
+    reply = f"Echo: {prompt}"
+    Prosperus.annotate(
+        input_data=[{"role": "user", "content": prompt}],
+        output_data=[{"role": "assistant", "content": reply}],
+        metrics={"input_tokens": 5, "output_tokens": 7},
+    )
+    return reply
 
 # Spans are automatically flushed to the API in the background
 handle_request("What is the weather?")
@@ -58,7 +68,7 @@ Decorators are the primary way to instrument your code. Each decorator creates a
 All decorators support both bare and parameterized syntax:
 
 ```python
-from prosperus.decorators import llm, tool
+from prosperus import llm, tool
 
 # Bare — span name defaults to function name
 @llm
@@ -90,7 +100,7 @@ Parent-child nesting is handled automatically via Python `contextvars` — no ma
 Add input/output data, metadata, metrics, and tags to the active span:
 
 ```python
-from prosperus import Prosperus
+from prosperus import Prosperus, llm
 
 @llm(model_name="gpt-4o", model_provider="openai")
 def call_model(messages):
@@ -127,20 +137,25 @@ with ph.llm("generate", model_name="gpt-4o") as span:
 |---|---|---|
 | `api_key` | str | API key for authentication |
 | `app_name` | str | Application identifier (groups traces) |
-| `base_url` | str | API endpoint (default: `http://localhost:4100`) |
+| `endpoint` | str | API endpoint (default: `https://ingest.prosperus.dev`) |
 | `flush_interval` | float | Seconds between background flushes (default: `5.0`) |
-| `max_batch_size` | int | Max spans per flush batch (default: `100`) |
+| `span_processor` | `Callable[[SpanData], SpanData | None] | None` | Optional processor for redaction or filtering before spans are sent |
+
+For local development against the repo's API server, set `endpoint="http://localhost:4100"`.
 
 ## Testing
 
-The SDK can be used in tests without sending data to the API:
+The SDK can be used in tests without talking to a real Prosperus backend:
 
 ```python
-ph = Prosperus(api_key="test", app_name="test-app")
+ph = Prosperus(
+    api_key="test",
+    app_name="test-app",
+    endpoint="http://127.0.0.1:1",  # force connection failures to stay local
+)
 ph.enable()
 
-# Use context managers or decorators as normal
-# Spans are collected in memory but the flush thread
-# won't connect since "test" isn't a valid endpoint
+# Use context managers or decorators as normal.
+# Flush failures are swallowed and logged, so tests can inspect spans in memory.
 ph.shutdown()
 ```

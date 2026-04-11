@@ -4,12 +4,10 @@ Instrument your LLM applications with traces, spans, evaluations, and metrics.
 
 Quick start::
 
-    from prosperus import Prosperus
+    from prosperus import Prosperus, llm, workflow
 
     ph = Prosperus(api_key="ph-...", app_name="my-chatbot")
     ph.enable()
-
-    from prosperus.decorators import llm, workflow
 
     @workflow
     def handle_request(user_msg: str) -> str:
@@ -21,7 +19,32 @@ Quick start::
 """
 
 from prosperus.client import Prosperus
-from prosperus.types import SpanKind
+from prosperus.decorators import agent, embedding, llm, retrieval, task, tool, workflow
+from prosperus.types import (
+    CostMetrics,
+    Document,
+    Evaluation,
+    Message,
+    Prompt,
+    SpanContext,
+    SpanKind,
+)
 
-__all__ = ["Prosperus", "SpanKind"]
+__all__ = [
+    "Prosperus",
+    "SpanKind",
+    "SpanContext",
+    "Message",
+    "Document",
+    "Prompt",
+    "Evaluation",
+    "CostMetrics",
+    "llm",
+    "workflow",
+    "agent",
+    "tool",
+    "task",
+    "embedding",
+    "retrieval",
+]
 __version__ = "0.1.0"

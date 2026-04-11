@@ -20,8 +20,6 @@ logger = logging.getLogger("prosperus")
 _global_client: Prosperus | None = None
 _lock = threading.Lock()
 
-SpanProcessor = Callable[[SpanData], SpanData | None]
-
 
 def _get_global() -> Prosperus | None:
     return _global_client
@@ -43,7 +41,7 @@ class Prosperus:
         app_name: str,
         endpoint: str = "https://ingest.prosperus.dev",
         flush_interval: float = 5.0,
-        span_processor: SpanProcessor | None = None,
+        span_processor: Callable[[SpanData], SpanData | None] | None = None,
     ) -> None:
         self.api_key = api_key
         self.app_name = app_name
@@ -243,7 +241,7 @@ class Prosperus:
 
     # -- span processor ---------------------------------------------------
 
-    def register_processor(self, processor: SpanProcessor) -> None:
+    def register_processor(self, processor: Callable[[SpanData], SpanData | None]) -> None:
         """Register a function that can modify or filter spans before they are sent."""
         self._span_processor = processor
 

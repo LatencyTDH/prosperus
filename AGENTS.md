@@ -41,10 +41,10 @@ make format                           # Format all code
 
 # Python SDK
 cd packages/sdk-python
-pip install -e ".[dev]"
-pytest                                # Run SDK tests
-ruff check src/                       # Lint
-mypy src/                             # Type check
+uv sync
+uv run pytest                         # Run SDK tests
+uv run ruff check src/                # Lint
+uv run mypy src/                      # Type check
 
 # Server-specific
 pnpm --filter @prosperus/server db:generate  # Generate migration from schema changes
@@ -71,7 +71,7 @@ pnpm --filter @prosperus/server db:migrate   # Apply migrations
 
 | Package | Runner | Command |
 |---|---|---|
-| sdk-python | pytest | `cd packages/sdk-python && pytest` |
+| sdk-python | pytest | `cd packages/sdk-python && uv run pytest` |
 | server | vitest | `pnpm --filter @prosperus/server test` |
 | web | vitest | `pnpm --filter @prosperus/web test` |
 
