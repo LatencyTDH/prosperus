@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "LLM Observability Platform",
+  "packageManager": "pnpm@10.33.0",
   "scripts": {
     "dev:server": "pnpm --filter @prosperus/server dev",
     "dev:web": "pnpm --filter @prosperus/web dev",
