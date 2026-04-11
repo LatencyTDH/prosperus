@@ -1,0 +1,17 @@
+{
+  "name": "phosphor",
+  "version": "0.1.0",
+  "private": true,
+  "description": "LLM Observability Platform",
+  "scripts": {
+    "dev:server": "pnpm --filter @phosphor/server dev",
+    "dev:web": "pnpm --filter @phosphor/web dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test"
+  },
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  }
+}

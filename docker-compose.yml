@@ -1,0 +1,33 @@
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: phosphor
+      POSTGRES_PASSWORD: phosphor
+      POSTGRES_DB: phosphor
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  server:
+    build:
+      context: .
+      dockerfile: packages/server/Dockerfile
+    ports:
+      - "4100:4100"
+    environment:
+      DATABASE_URL: postgresql://phosphor:phosphor@postgres:5432/phosphor
+      PORT: "4100"
+    depends_on:
+      - postgres
+
+  web:
+    build:
+      context: .
+      dockerfile: packages/web/Dockerfile
+    ports:
+      - "4200:4200"
+
+volumes:
+  pgdata:

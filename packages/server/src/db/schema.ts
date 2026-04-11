@@ -1,0 +1,105 @@
+import {
+  pgTable,
+  text,
+  bigint,
+  jsonb,
+  timestamp,
+  real,
+  index,
+  varchar,
+  pgEnum,
+} from "drizzle-orm/pg-core";
+
+export const spanKindEnum = pgEnum("span_kind", [
+  "llm",
+  "workflow",
+  "agent",
+  "tool",
+  "task",
+  "embedding",
+  "retrieval",
+]);
+
+// ── Spans ──────────────────────────────────────────────────────────────────
+
+export const spans = pgTable(
+  "spans",
+  {
+    spanId: varchar("span_id", { length: 32 }).primaryKey(),
+    traceId: varchar("trace_id", { length: 32 }).notNull(),
+    parentId: varchar("parent_id", { length: 32 }),
+    name: text("name").notNull(),
+    kind: spanKindEnum("kind").notNull(),
+    appName: text("app_name").notNull(),
+    startNs: bigint("start_ns", { mode: "bigint" }).notNull(),
+    endNs: bigint("end_ns", { mode: "bigint" }).notNull(),
+    inputData: jsonb("input_data"),
+    outputData: jsonb("output_data"),
+    metadata: jsonb("metadata").$type<Record<string, unknown>>().default({}),
+    metrics: jsonb("metrics").$type<Record<string, number>>().default({}),
+    tags: jsonb("tags").$type<Record<string, string>>().default({}),
+    error: jsonb("error").$type<{ type: string; message: string } | null>(),
+    sessionId: text("session_id"),
+    prompt: jsonb("prompt"),
+    modelName: text("model_name"),
+    modelProvider: text("model_provider"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("idx_spans_trace_id").on(table.traceId),
+    index("idx_spans_app_name").on(table.appName),
+    index("idx_spans_kind").on(table.kind),
+    index("idx_spans_created_at").on(table.createdAt),
+    index("idx_spans_session_id").on(table.sessionId),
+  ]
+);
+
+// ── Evaluations ────────────────────────────────────────────────────────────
+
+export const evaluations = pgTable(
+  "evaluations",
+  {
+    id: varchar("id", { length: 32 }).primaryKey(),
+    spanId: varchar("span_id", { length: 32 }),
+    traceId: varchar("trace_id", { length: 32 }),
+    appName: text("app_name").notNull(),
+    label: text("label").notNull(),
+    metricType: text("metric_type").notNull(), // "score" | "categorical"
+    numericValue: real("numeric_value"),
+    stringValue: text("string_value"),
+    assessment: text("assessment"),
+    reasoning: text("reasoning"),
+    tags: jsonb("tags").$type<Record<string, string>>().default({}),
+    metadata: jsonb("metadata").$type<Record<string, unknown>>().default({}),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("idx_eval_span_id").on(table.spanId),
+    index("idx_eval_app_name").on(table.appName),
+    index("idx_eval_label").on(table.label),
+  ]
+);
+
+// ── Prompts (version tracking) ─────────────────────────────────────────────
+
+export const prompts = pgTable(
+  "prompts",
+  {
+    id: varchar("id", { length: 128 }).notNull(),
+    version: text("version").notNull(),
+    template: text("template"),
+    chatTemplate: jsonb("chat_template").$type<Array<{ role: string; content: string }>>(),
+    variables: jsonb("variables").$type<Record<string, string>>().default({}),
+    tags: jsonb("tags").$type<Record<string, string>>().default({}),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [index("idx_prompts_id_version").on(table.id, table.version)]
+);
+
+// ── Type helpers ───────────────────────────────────────────────────────────
+
+export type SpanRow = typeof spans.$inferSelect;
+export type SpanInsert = typeof spans.$inferInsert;
+export type EvaluationRow = typeof evaluations.$inferSelect;
+export type EvaluationInsert = typeof evaluations.$inferInsert;
+export type PromptRow = typeof prompts.$inferSelect;
