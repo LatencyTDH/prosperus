@@ -1,0 +1,4 @@
+* @prosperus-dev/core
+packages/sdk-python/ @prosperus-dev/sdk
+packages/server/ @prosperus-dev/backend
+packages/web/ @prosperus-dev/frontend

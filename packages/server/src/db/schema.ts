@@ -8,6 +8,7 @@ import {
   index,
   varchar,
   pgEnum,
+  primaryKey,
 } from "drizzle-orm/pg-core";
 
 export const spanKindEnum = pgEnum("span_kind", [
@@ -75,6 +76,7 @@ export const evaluations = pgTable(
   },
   (table) => [
     index("idx_eval_span_id").on(table.spanId),
+    index("idx_eval_trace_id").on(table.traceId),
     index("idx_eval_app_name").on(table.appName),
     index("idx_eval_label").on(table.label),
   ]
@@ -93,7 +95,10 @@ export const prompts = pgTable(
     tags: jsonb("tags").$type<Record<string, string>>().default({}),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
-  (table) => [index("idx_prompts_id_version").on(table.id, table.version)]
+  (table) => [
+    primaryKey({ columns: [table.id, table.version] }),
+    index("idx_prompts_id_version").on(table.id, table.version),
+  ]
 );
 
 // ── Type helpers ───────────────────────────────────────────────────────────

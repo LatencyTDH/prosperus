@@ -1,6 +1,6 @@
 import { db } from "../db/connection.js";
 import { evaluations, spans, type EvaluationInsert } from "../db/schema.js";
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 
 interface EvaluationPayload {
@@ -27,21 +27,18 @@ export async function submitEvaluations(payloads: EvaluationPayload[]): Promise<
       spanId = p.span_context.span_id;
       traceId = p.span_context.trace_id;
     } else if (p.span_with_tag_value) {
-      // Resolve span by tag lookup
+      // Resolve span by tag lookup using jsonb containment operator
       const { tag_key, tag_value } = p.span_with_tag_value;
-      const matched = await db
+      const [found] = await db
         .select({ spanId: spans.spanId, traceId: spans.traceId })
         .from(spans)
         .where(
-          eq(spans.appName, p.app_name)
+          and(
+            eq(spans.appName, p.app_name),
+            sql`${spans.tags} @> ${JSON.stringify({ [tag_key]: tag_value })}::jsonb`
+          )
         )
-        .limit(100);
-
-      // Filter by tag in application — jsonb lookup
-      const found = matched.find((row) => {
-        // Tags are stored as jsonb, we need to check the specific key
-        return true; // Simplified: in production, use SQL jsonb operator
-      });
+        .limit(1);
 
       if (found) {
         spanId = found.spanId;

@@ -1,18 +1,24 @@
 import type { FastifyInstance } from "fastify";
+import { z } from "zod";
 import { listTraces, getTraceSpans, getSpanEvaluations } from "../services/query.js";
 
+const tracesQuery = z.object({
+  app_name: z.string().optional(),
+  limit: z.coerce.number().int().min(1).max(200).optional(),
+  offset: z.coerce.number().int().min(0).optional(),
+});
+
 export async function tracesRoutes(app: FastifyInstance) {
-  app.get("/v1/traces", async (req) => {
-    const query = req.query as {
-      app_name?: string;
-      limit?: string;
-      offset?: string;
-    };
+  app.get("/v1/traces", async (req, reply) => {
+    const parsed = tracesQuery.safeParse(req.query);
+    if (!parsed.success) {
+      return reply.status(400).send({ error: parsed.error.flatten() });
+    }
 
     const traces = await listTraces({
-      appName: query.app_name,
-      limit: query.limit ? parseInt(query.limit, 10) : undefined,
-      offset: query.offset ? parseInt(query.offset, 10) : undefined,
+      appName: parsed.data.app_name,
+      limit: parsed.data.limit,
+      offset: parsed.data.offset,
     });
 
     return {

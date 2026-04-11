@@ -1,13 +1,13 @@
-"""Tests for the Phosphor SDK core tracing functionality."""
+"""Tests for the Prosperus SDK core tracing functionality."""
 
-from phosphor import Phosphor, SpanKind
-from phosphor.decorators import agent, embedding, llm, retrieval, task, tool, workflow
-from phosphor.spans import Span, get_active_span
+from prosperus import Prosperus, SpanKind
+from prosperus.decorators import agent, embedding, llm, retrieval, task, tool, workflow
+from prosperus.spans import Span, get_active_span
 
 
 class TestSpanLifecycle:
     def test_span_context_manager(self) -> None:
-        ph = Phosphor(api_key="test", app_name="test-app")
+        ph = Prosperus(api_key="test", app_name="test-app")
         ph.enable()
 
         with ph.workflow("test-wf") as span:
@@ -20,7 +20,7 @@ class TestSpanLifecycle:
         ph.shutdown()
 
     def test_nested_spans_form_tree(self) -> None:
-        ph = Phosphor(api_key="test", app_name="test-app")
+        ph = Prosperus(api_key="test", app_name="test-app")
         ph.enable()
 
         with ph.workflow("outer") as outer:
@@ -31,11 +31,11 @@ class TestSpanLifecycle:
         ph.shutdown()
 
     def test_annotation(self) -> None:
-        ph = Phosphor(api_key="test", app_name="test-app")
+        ph = Prosperus(api_key="test", app_name="test-app")
         ph.enable()
 
         with ph.llm("call", model_name="claude", model_provider="anthropic") as span:
-            Phosphor.annotate(
+            Prosperus.annotate(
                 input_data=[{"role": "user", "content": "hello"}],
                 output_data=[{"role": "assistant", "content": "hi"}],
                 metadata={"temperature": 0.7},
@@ -50,11 +50,11 @@ class TestSpanLifecycle:
         ph.shutdown()
 
     def test_export_span(self) -> None:
-        ph = Phosphor(api_key="test", app_name="test-app")
+        ph = Prosperus(api_key="test", app_name="test-app")
         ph.enable()
 
         with ph.llm("call", model_name="test") as span:
-            ctx = Phosphor.export_span()
+            ctx = Prosperus.export_span()
             assert ctx.trace_id == span.trace_id
             assert ctx.span_id == span.span_id
 
@@ -63,7 +63,7 @@ class TestSpanLifecycle:
 
 class TestDecorators:
     def test_workflow_decorator(self) -> None:
-        ph = Phosphor(api_key="test", app_name="test-app")
+        ph = Prosperus(api_key="test", app_name="test-app")
         ph.enable()
         captured_spans: list[Span] = []
         original_enqueue = ph._enqueue_span
@@ -85,7 +85,7 @@ class TestDecorators:
         ph.shutdown()
 
     def test_llm_decorator(self) -> None:
-        ph = Phosphor(api_key="test", app_name="test-app")
+        ph = Prosperus(api_key="test", app_name="test-app")
         ph.enable()
 
         @llm(model_name="gpt-4o", model_provider="openai")
@@ -97,7 +97,7 @@ class TestDecorators:
         ph.shutdown()
 
     def test_nested_decorators(self) -> None:
-        ph = Phosphor(api_key="test", app_name="test-app")
+        ph = Prosperus(api_key="test", app_name="test-app")
         ph.enable()
         spans: list[Span] = []
         original_enqueue = ph._enqueue_span
@@ -129,7 +129,7 @@ class TestDecorators:
 
 class TestSpanProcessor:
     def test_processor_can_modify_spans(self) -> None:
-        ph = Phosphor(api_key="test", app_name="test-app")
+        ph = Prosperus(api_key="test", app_name="test-app")
 
         def redact(span_data):
             if span_data.tags.get("redact") == "true":
@@ -141,7 +141,7 @@ class TestSpanProcessor:
         ph.enable()
 
         with ph.llm("call", model_name="test") as span:
-            Phosphor.annotate(
+            Prosperus.annotate(
                 input_data="secret input",
                 output_data="secret output",
                 tags={"redact": "true"},
@@ -152,7 +152,7 @@ class TestSpanProcessor:
         ph.shutdown()
 
     def test_processor_can_filter_spans(self) -> None:
-        ph = Phosphor(api_key="test", app_name="test-app")
+        ph = Prosperus(api_key="test", app_name="test-app")
 
         def drop_internal(span_data):
             if span_data.tags.get("internal") == "true":
@@ -163,7 +163,7 @@ class TestSpanProcessor:
         ph.enable()
 
         with ph.task("internal-step") as span:
-            Phosphor.annotate(tags={"internal": "true"})
+            Prosperus.annotate(tags={"internal": "true"})
 
         assert len(ph._buffer) == 0
         ph.shutdown()
@@ -171,11 +171,11 @@ class TestSpanProcessor:
 
 class TestEvaluations:
     def test_submit_evaluation(self) -> None:
-        ph = Phosphor(api_key="test", app_name="test-app")
+        ph = Prosperus(api_key="test", app_name="test-app")
         ph.enable()
 
         with ph.llm("call", model_name="test") as span:
-            ctx = Phosphor.export_span()
+            ctx = Prosperus.export_span()
 
         ph.submit_evaluation(
             label="toxicity",
@@ -196,17 +196,17 @@ class TestEvaluations:
 
 class TestDistributedTracing:
     def test_header_injection_and_activation(self) -> None:
-        ph = Phosphor(api_key="test", app_name="test-app")
+        ph = Prosperus(api_key="test", app_name="test-app")
         ph.enable()
 
         with ph.workflow("origin") as origin_span:
             headers: dict[str, str] = {}
-            headers = Phosphor.inject_distributed_headers(headers)
-            assert headers["x-phosphor-trace-id"] == origin_span.trace_id
-            assert headers["x-phosphor-parent-id"] == origin_span.span_id
+            headers = Prosperus.inject_distributed_headers(headers)
+            assert headers["x-prosperus-trace-id"] == origin_span.trace_id
+            assert headers["x-prosperus-parent-id"] == origin_span.span_id
 
         # Simulate downstream service
-        Phosphor.activate_distributed_headers(headers)
+        Prosperus.activate_distributed_headers(headers)
         with ph.task("downstream-work") as downstream:
             assert downstream.trace_id == origin_span.trace_id
 

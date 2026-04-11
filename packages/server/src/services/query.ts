@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, lte, sql } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, lte, sql } from "drizzle-orm";
 import { db } from "../db/connection.js";
 import { spans, evaluations, type SpanRow, type EvaluationRow } from "../db/schema.js";
 
@@ -50,7 +50,7 @@ export async function listTraces(opts: {
       hasError: sql<boolean>`bool_or(${spans.error} IS NOT NULL)`,
     })
     .from(spans)
-    .where(sql`${spans.traceId} IN ${traceIds}`)
+    .where(inArray(spans.traceId, traceIds))
     .groupBy(spans.traceId);
 
   const countMap = new Map(counts.map((c) => [c.traceId, c]));

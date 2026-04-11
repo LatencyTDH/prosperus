@@ -9,6 +9,6 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.error("Failed to start Phosphor server:", err);
+  console.error("Failed to start Prosperus server:", err);
   process.exit(1);
 });

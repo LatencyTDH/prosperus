@@ -2,8 +2,8 @@ FROM node:22-slim AS build
 WORKDIR /app
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* ./
 COPY packages/web/ packages/web/
-RUN corepack enable pnpm && pnpm install --frozen-lockfile --filter @phosphor/web
-RUN pnpm --filter @phosphor/web build
+RUN corepack enable pnpm && pnpm install --frozen-lockfile --filter @prosperus/web
+RUN pnpm --filter @prosperus/web build
 
 FROM node:22-slim
 WORKDIR /app

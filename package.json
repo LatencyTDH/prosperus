@@ -1,13 +1,14 @@
 {
-  "name": "phosphor",
+  "name": "prosperus",
   "version": "0.1.0",
   "private": true,
   "description": "LLM Observability Platform",
   "scripts": {
-    "dev:server": "pnpm --filter @phosphor/server dev",
-    "dev:web": "pnpm --filter @phosphor/web dev",
+    "dev:server": "pnpm --filter @prosperus/server dev",
+    "dev:web": "pnpm --filter @prosperus/web dev",
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
+    "format": "pnpm -r format",
     "test": "pnpm -r test"
   },
   "engines": {

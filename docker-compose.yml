@@ -2,9 +2,9 @@ services:
   postgres:
     image: postgres:17
     environment:
-      POSTGRES_USER: phosphor
-      POSTGRES_PASSWORD: phosphor
-      POSTGRES_DB: phosphor
+      POSTGRES_USER: prosperus
+      POSTGRES_PASSWORD: prosperus
+      POSTGRES_DB: prosperus
     ports:
       - "5432:5432"
     volumes:
@@ -17,7 +17,7 @@ services:
     ports:
       - "4100:4100"
     environment:
-      DATABASE_URL: postgresql://phosphor:phosphor@postgres:5432/phosphor
+      DATABASE_URL: postgresql://prosperus:prosperus@postgres:5432/prosperus
       PORT: "4100"
     depends_on:
       - postgres

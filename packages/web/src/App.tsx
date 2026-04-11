@@ -16,7 +16,7 @@ export function App() {
       <div className="min-h-screen flex flex-col">
         <header className="border-b border-zinc-800 px-6 py-3 flex items-center gap-8">
           <h1 className="text-lg font-semibold tracking-tight text-amber-400">
-            ◐ Phosphor
+            ◐ Prosperus
           </h1>
           <nav className="flex gap-4 text-sm">
             {navLinks.map((l) => (

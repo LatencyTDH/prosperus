@@ -1,4 +1,4 @@
-"""Phosphor client — global singleton managing span collection, flushing, and API communication."""
+"""Prosperus client — global singleton managing span collection, flushing, and API communication."""
 
 from __future__ import annotations
 
@@ -11,27 +11,27 @@ from typing import Any, Callable, Iterator, Optional
 
 import httpx
 
-from phosphor.spans import Span, get_active_span
-from phosphor.types import CostMetrics, Evaluation, Prompt, SpanContext, SpanData, SpanKind
+from prosperus.spans import Span, get_active_span
+from prosperus.types import CostMetrics, Evaluation, Prompt, SpanContext, SpanData, SpanKind
 
-logger = logging.getLogger("phosphor")
+logger = logging.getLogger("prosperus")
 
-_global_client: Optional[Phosphor] = None
+_global_client: Optional[Prosperus] = None
 _lock = threading.Lock()
 
 SpanProcessor = Callable[[SpanData], Optional[SpanData]]
 
 
-def _get_global() -> Optional[Phosphor]:
+def _get_global() -> Optional[Prosperus]:
     return _global_client
 
 
-class Phosphor:
-    """Top-level client for the Phosphor LLM Observability SDK.
+class Prosperus:
+    """Top-level client for the Prosperus LLM Observability SDK.
 
     Usage::
 
-        ph = Phosphor(api_key="ph-...", app_name="my-chatbot")
+        ph = Prosperus(api_key="ph-...", app_name="my-chatbot")
         ph.enable()
     """
 
@@ -40,7 +40,7 @@ class Phosphor:
         *,
         api_key: str,
         app_name: str,
-        endpoint: str = "https://ingest.phosphor.dev",
+        endpoint: str = "https://ingest.prosperus.dev",
         flush_interval: float = 5.0,
         span_processor: SpanProcessor | None = None,
     ) -> None:
@@ -69,7 +69,7 @@ class Phosphor:
         self._enabled = True
         self._schedule_flush()
         atexit.register(self.shutdown)
-        logger.info("Phosphor enabled for app=%s", self.app_name)
+        logger.info("Prosperus enabled for app=%s", self.app_name)
 
     def disable(self) -> None:
         global _global_client
@@ -227,17 +227,17 @@ class Phosphor:
         target = span or get_active_span()
         if target is None:
             return request_headers
-        request_headers["x-phosphor-trace-id"] = target.trace_id
-        request_headers["x-phosphor-parent-id"] = target.span_id
+        request_headers["x-prosperus-trace-id"] = target.trace_id
+        request_headers["x-prosperus-parent-id"] = target.span_id
         return request_headers
 
     @staticmethod
     def activate_distributed_headers(request_headers: dict[str, str]) -> None:
         """Read distributed context from incoming HTTP headers."""
-        from phosphor.spans import _active_span
+        from prosperus.spans import _active_span
 
-        trace_id = request_headers.get("x-phosphor-trace-id")
-        parent_id = request_headers.get("x-phosphor-parent-id")
+        trace_id = request_headers.get("x-prosperus-trace-id")
+        parent_id = request_headers.get("x-prosperus-parent-id")
         if trace_id and parent_id:
             # Create a phantom parent so child spans attach correctly
             client = _get_global()
@@ -267,7 +267,7 @@ class Phosphor:
         self._buffer.append(data)
 
     def flush(self) -> None:
-        """Send all buffered spans and evaluations to the Phosphor backend."""
+        """Send all buffered spans and evaluations to the Prosperus backend."""
         spans_to_send: list[dict[str, Any]] = []
         while self._buffer:
             spans_to_send.append(self._buffer.popleft().to_dict())

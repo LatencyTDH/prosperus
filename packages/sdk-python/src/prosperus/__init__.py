@@ -1,15 +1,15 @@
-"""Phosphor — LLM Observability SDK.
+"""Prosperus — LLM Observability SDK.
 
 Instrument your LLM applications with traces, spans, evaluations, and metrics.
 
 Quick start::
 
-    from phosphor import Phosphor
+    from prosperus import Prosperus
 
-    ph = Phosphor(api_key="ph-...", app_name="my-chatbot")
+    ph = Prosperus(api_key="ph-...", app_name="my-chatbot")
     ph.enable()
 
-    from phosphor.decorators import llm, workflow
+    from prosperus.decorators import llm, workflow
 
     @workflow
     def handle_request(user_msg: str) -> str:
@@ -20,8 +20,8 @@ Quick start::
         ...
 """
 
-from phosphor.client import Phosphor
-from phosphor.types import SpanKind
+from prosperus.client import Prosperus
+from prosperus.types import SpanKind
 
-__all__ = ["Phosphor", "SpanKind"]
+__all__ = ["Prosperus", "SpanKind"]
 __version__ = "0.1.0"

@@ -5,8 +5,8 @@ from __future__ import annotations
 import functools
 from typing import Any, Callable, TypeVar
 
-from phosphor.spans import Span, get_active_span
-from phosphor.types import SpanKind
+from prosperus.spans import Span, get_active_span
+from prosperus.types import SpanKind
 
 F = TypeVar("F", bound=Callable[..., Any])
 
@@ -23,7 +23,7 @@ def _make_decorator(
     def decorator(fn: F) -> F:
         @functools.wraps(fn)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
-            from phosphor.client import _get_global
+            from prosperus.client import _get_global
 
             client = _get_global()
             app_name = ml_app or (client.app_name if client else "unknown")

@@ -1,10 +1,10 @@
-"""Core type definitions for Phosphor SDK."""
+"""Core type definitions for Prosperus SDK."""
 
 from __future__ import annotations
 
 import enum
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 
 class SpanKind(str, enum.Enum):
@@ -102,7 +102,7 @@ class SpanData:
 
     trace_id: str
     span_id: str
-    parent_id: Optional[str]
+    parent_id: str | None
     name: str
     kind: SpanKind
     app_name: str
@@ -113,11 +113,11 @@ class SpanData:
     metadata: dict[str, Any] = field(default_factory=dict)
     metrics: dict[str, float] = field(default_factory=dict)
     tags: dict[str, str] = field(default_factory=dict)
-    error: Optional[dict[str, str]] = None
-    session_id: Optional[str] = None
-    prompt: Optional[dict[str, Any]] = None
-    model_name: Optional[str] = None
-    model_provider: Optional[str] = None
+    error: dict[str, str] | None = None
+    session_id: str | None = None
+    prompt: dict[str, Any] | None = None
+    model_name: str | None = None
+    model_provider: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         d: dict[str, Any] = {

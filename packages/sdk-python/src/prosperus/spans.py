@@ -7,10 +7,10 @@ import time
 import uuid
 from typing import Any, Optional
 
-from phosphor.types import SpanContext, SpanData, SpanKind
+from prosperus.types import SpanContext, SpanData, SpanKind
 
 _active_span: contextvars.ContextVar[Optional[Span]] = contextvars.ContextVar(
-    "phosphor_active_span", default=None
+    "prosperus_active_span", default=None
 )
 
 
@@ -137,7 +137,7 @@ class Span:
             _active_span.reset(self._token)
             self._token = None
         # Notify the global client to enqueue this span
-        from phosphor.client import _get_global
+        from prosperus.client import _get_global
         client = _get_global()
         if client is not None:
             client._enqueue_span(self)

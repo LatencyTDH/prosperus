@@ -5,6 +5,6 @@ export default defineConfig({
   schema: "./src/db/schema.ts",
   out: "./drizzle",
   dbCredentials: {
-    url: process.env.DATABASE_URL ?? "postgresql://phosphor:phosphor@localhost:5432/phosphor",
+    url: process.env.DATABASE_URL ?? "postgresql://prosperus:prosperus@localhost:5432/prosperus",
   },
 });

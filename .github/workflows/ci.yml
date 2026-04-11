@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  server:
+    name: Server (build + lint + test)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: prosperus
+          POSTGRES_PASSWORD: prosperus
+          POSTGRES_DB: prosperus
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U prosperus"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    env:
+      DATABASE_URL: postgresql://prosperus:prosperus@localhost:5432/prosperus
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @prosperus/server build
+      - run: pnpm --filter @prosperus/server lint
+      - run: pnpm --filter @prosperus/server test
+
+  web:
+    name: Web (build + lint + test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @prosperus/web build
+      - run: pnpm --filter @prosperus/web lint
+      - run: pnpm --filter @prosperus/web test
+
+  sdk-python:
+    name: Python SDK (lint + typecheck + test)
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.12"]
+    defaults:
+      run:
+        working-directory: packages/sdk-python
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: pip install -e ".[dev]"
+      - run: ruff check src/
+      - run: mypy src/
+      - run: pytest

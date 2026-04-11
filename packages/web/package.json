@@ -1,5 +1,5 @@
 {
-  "name": "@phosphor/web",
+  "name": "@prosperus/web",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "lint": "eslint src/"
+    "lint": "eslint src/",
+    "format": "prettier --write src/",
+    "test": "vitest run"
   },
   "dependencies": {
     "react": "^19.0.0",

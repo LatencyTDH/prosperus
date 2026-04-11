@@ -3,7 +3,7 @@ import postgres from "postgres";
 import * as schema from "./schema.js";
 
 const connectionString =
-  process.env.DATABASE_URL ?? "postgresql://phosphor:phosphor@localhost:5432/phosphor";
+  process.env.DATABASE_URL ?? "postgresql://prosperus:prosperus@localhost:5432/prosperus";
 
 const client = postgres(connectionString);
 export const db = drizzle(client, { schema });

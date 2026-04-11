@@ -1,5 +1,5 @@
 .github/copilot-instructions.md
-- Phosphor is an LLM Observability platform for monitoring, troubleshooting, and evaluating LLM-powered applications.
+- Prosperus is an LLM Observability platform for monitoring, troubleshooting, and evaluating LLM-powered applications.
 - Monorepo with three packages: `sdk-python` (Python SDK), `server` (Fastify API), `web` (React dashboard).
 - Use pnpm for JS/TS packages, hatchling for the Python SDK.
 - The Python SDK uses context-var propagation for automatic parent-child span nesting.
