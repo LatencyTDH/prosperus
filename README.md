@@ -1,5 +1,7 @@
 # Prosperus
 
+![Prosperus banner](./prosperus-banner.png)
+
 LLM Observability platform for monitoring, troubleshooting, and evaluating LLM-powered applications.
 
 ## Table of Contents
