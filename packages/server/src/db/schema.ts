@@ -9,6 +9,8 @@ import {
   varchar,
   pgEnum,
   primaryKey,
+  boolean,
+  integer,
 } from "drizzle-orm/pg-core";
 
 export const spanKindEnum = pgEnum("span_kind", [
@@ -44,6 +46,10 @@ export const spans = pgTable(
     prompt: jsonb("prompt"),
     modelName: text("model_name"),
     modelProvider: text("model_provider"),
+    // Estimated cost in USD (computed on ingestion for supported providers)
+    inputCost: real("input_cost"),
+    outputCost: real("output_cost"),
+    totalCost: real("total_cost"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => [
@@ -52,6 +58,7 @@ export const spans = pgTable(
     index("idx_spans_kind").on(table.kind),
     index("idx_spans_created_at").on(table.createdAt),
     index("idx_spans_session_id").on(table.sessionId),
+    index("idx_spans_model").on(table.modelName, table.modelProvider),
   ]
 );
 
@@ -101,6 +108,29 @@ export const prompts = pgTable(
   ]
 );
 
+// ── Experiments ────────────────────────────────────────────────────────────
+
+export const experiments = pgTable(
+  "experiments",
+  {
+    id: varchar("id", { length: 32 }).primaryKey(),
+    appName: text("app_name").notNull(),
+    name: text("name").notNull(),
+    description: text("description"),
+    baselineTag: text("baseline_tag"),
+    variantTags: jsonb("variant_tags").$type<string[]>().default([]),
+    status: text("status").notNull().default("running"), // running | completed
+    config: jsonb("config").$type<Record<string, unknown>>().default({}),
+    results: jsonb("results").$type<Record<string, unknown>>(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("idx_experiments_app_name").on(table.appName),
+    index("idx_experiments_status").on(table.status),
+  ]
+);
+
 // ── Type helpers ───────────────────────────────────────────────────────────
 
 export type SpanRow = typeof spans.$inferSelect;
@@ -108,3 +138,5 @@ export type SpanInsert = typeof spans.$inferInsert;
 export type EvaluationRow = typeof evaluations.$inferSelect;
 export type EvaluationInsert = typeof evaluations.$inferInsert;
 export type PromptRow = typeof prompts.$inferSelect;
+export type ExperimentRow = typeof experiments.$inferSelect;
+export type ExperimentInsert = typeof experiments.$inferInsert;
