@@ -4,6 +4,7 @@
 
 setup: ## Install dependencies and start PostgreSQL
 	pnpm install
+	pre-commit install
 	docker compose up postgres -d
 	pnpm --filter @prosperus/server db:migrate
 

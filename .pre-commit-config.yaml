@@ -1,0 +1,75 @@
+default_install_hook_types: ['pre-commit']
+default_stages: [pre-commit]
+
+exclude: >
+  (?x)(
+      \.snap$|
+      \.map$|
+      pnpm-lock\.yaml$|
+      ^packages/sdk-python/\.venv/
+  )
+
+repos:
+  # ── Local hooks (use project-local tooling) ──────────────────
+
+  - repo: local
+    hooks:
+      # Python: ruff check + format (mirrors pyproject.toml config)
+      - id: ruff-check
+        name: ruff check
+        entry: ruff check --force-exclude --fix
+        language: system
+        types: [python]
+        require_serial: true
+
+      - id: ruff-format
+        name: ruff format
+        entry: ruff format --force-exclude
+        language: system
+        types_or: [python, pyi]
+        require_serial: true
+
+      # TypeScript / JavaScript: eslint
+      - id: eslint
+        name: eslint
+        entry: ./node_modules/.bin/eslint --fix
+        language: system
+        files: ^packages/(server|web)/src/.*\.(ts|tsx|js|jsx)$
+        require_serial: true
+
+  # ── Generic quality hooks ────────────────────────────────────
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: check-symlinks
+      - id: check-yaml
+      - id: end-of-file-fixer
+        exclude_types: [svg]
+      - id: trailing-whitespace
+        exclude_types: [svg]
+      - id: debug-statements
+      - id: check-added-large-files
+        args: ['--maxkb=1024']
+      - id: name-tests-test
+        args: [--pytest-test-first]
+        files: ^packages/sdk-python/tests/
+
+  # ── Python-specific pygrep hooks ─────────────────────────────
+
+  - repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.10.0
+    hooks:
+      - id: python-use-type-annotations
+      - id: python-check-blanket-type-ignore
+
+  # ── GitHub Actions / Workflows validation ────────────────────
+
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.29.3
+    hooks:
+      - id: check-github-actions
+      - id: check-github-workflows
+        args: [--verbose]
