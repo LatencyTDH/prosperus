@@ -1,8 +1,24 @@
 """Tests for the Prosperus SDK core tracing functionality."""
 
-from prosperus import Prosperus, SpanKind
-from prosperus.decorators import agent, embedding, llm, retrieval, task, tool, workflow
+from prosperus import (
+    Prosperus,
+    SpanKind,
+)
+from prosperus import (
+    llm as package_llm,
+)
+from prosperus import (
+    workflow as package_workflow,
+)
+from prosperus.decorators import llm, tool, workflow
 from prosperus.spans import Span, get_active_span
+
+
+def test_top_level_imports_expose_common_sdk_api() -> None:
+    assert Prosperus is not None
+    assert SpanKind.LLM.value == "llm"
+    assert callable(package_workflow)
+    assert callable(package_llm)
 
 
 class TestSpanLifecycle:
@@ -23,10 +39,12 @@ class TestSpanLifecycle:
         ph = Prosperus(api_key="test", app_name="test-app")
         ph.enable()
 
-        with ph.workflow("outer") as outer:
-            with ph.llm("inner", model_name="gpt-4o", model_provider="openai") as inner:
-                assert inner.parent_id == outer.span_id
-                assert inner.trace_id == outer.trace_id
+        with (
+            ph.workflow("outer") as outer,
+            ph.llm("inner", model_name="gpt-4o", model_provider="openai") as inner,
+        ):
+            assert inner.parent_id == outer.span_id
+            assert inner.trace_id == outer.trace_id
 
         ph.shutdown()
 
@@ -140,7 +158,7 @@ class TestSpanProcessor:
         ph.register_processor(redact)
         ph.enable()
 
-        with ph.llm("call", model_name="test") as span:
+        with ph.llm("call", model_name="test"):
             Prosperus.annotate(
                 input_data="secret input",
                 output_data="secret output",
@@ -162,7 +180,7 @@ class TestSpanProcessor:
         ph.register_processor(drop_internal)
         ph.enable()
 
-        with ph.task("internal-step") as span:
+        with ph.task("internal-step"):
             Prosperus.annotate(tags={"internal": "true"})
 
         assert len(ph._buffer) == 0
@@ -174,7 +192,7 @@ class TestEvaluations:
         ph = Prosperus(api_key="test", app_name="test-app")
         ph.enable()
 
-        with ph.llm("call", model_name="test") as span:
+        with ph.llm("call", model_name="test"):
             ctx = Prosperus.export_span()
 
         ph.submit_evaluation(

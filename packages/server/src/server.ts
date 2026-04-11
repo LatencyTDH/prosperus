@@ -4,6 +4,8 @@ import { spansRoutes } from "./routes/spans.js";
 import { tracesRoutes } from "./routes/traces.js";
 import { evaluationsRoutes } from "./routes/evaluations.js";
 import { metricsRoutes } from "./routes/metrics.js";
+import { promptsRoutes } from "./routes/prompts.js";
+import { experimentsRoutes } from "./routes/experiments.js";
 
 export async function buildServer() {
   const app = Fastify({
@@ -32,6 +34,8 @@ export async function buildServer() {
   await app.register(tracesRoutes);
   await app.register(evaluationsRoutes);
   await app.register(metricsRoutes);
+  await app.register(promptsRoutes);
+  await app.register(experimentsRoutes);
 
   return app;
 }

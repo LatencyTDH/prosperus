@@ -2,14 +2,20 @@
 
 ## Development Setup
 
-See [README.md](README.md#quick-start) for prerequisites and setup instructions.
+```bash
+make start    # installs deps, starts Postgres, migrates, launches dev servers
+make stop     # shuts everything down
+```
+
+See [README.md](README.md#quick-start) for prerequisites and manual setup steps.
 
 ## Workflow
 
 1. Create a branch from `main`
-2. Make your changes
-3. Run `make check` (builds, lints, and tests all packages)
-4. Open a pull request
+2. Run `make start` to get a local environment
+3. Make your changes
+4. Run `make check` (builds, lints, typechecks, and tests all packages)
+5. Open a pull request
 
 ## Code Standards
 

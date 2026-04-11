@@ -1,5 +1,7 @@
 # Prosperus
 
+![Prosperus banner](./prosperus-banner.png)
+
 LLM Observability platform for monitoring, troubleshooting, and evaluating LLM-powered applications.
 
 ## Table of Contents
@@ -29,30 +31,33 @@ Prosperus collects traces, spans, evaluations, and metrics from your LLM applica
 - pnpm ≥ 9
 - Docker & Docker Compose (for PostgreSQL)
 - Python ≥ 3.9 (for SDK development)
+- uv ≥ 0.8 (for SDK dependency management and commands)
 
 ### Setup
 
 ```bash
-# Clone and install dependencies
-git clone https://github.com/prosperus-dev/prosperus.git
+git clone https://github.com/LatencyTDH/prosperus.git
 cd prosperus
-pnpm install
-
-# Start PostgreSQL
-docker compose up postgres -d
-
-# Run database migrations
-pnpm --filter @prosperus/server db:migrate
-
-# Start development servers
-pnpm dev:server   # API on http://localhost:4100
-pnpm dev:web      # Dashboard on http://localhost:4200
+make start    # installs deps, starts Postgres, migrates, launches dev servers
 ```
 
-Or run everything with Docker Compose:
+That's it. API on http://localhost:4100, dashboard on http://localhost:4200.
+
+To stop everything:
 
 ```bash
-docker compose up
+make stop
+```
+
+Or run each step manually:
+
+```bash
+pnpm install
+(cd packages/sdk-python && uv sync --frozen)
+docker compose up postgres -d
+pnpm --filter @prosperus/server db:migrate
+pnpm dev:server   # API
+pnpm dev:web      # Dashboard
 ```
 
 ### Verify It Works
@@ -71,6 +76,9 @@ pnpm build
 # Run all tests
 pnpm test
 
+# Run the canonical local validation suite
+make check
+
 # Lint all packages
 pnpm lint
 
@@ -86,12 +94,13 @@ pnpm dev:web
 
 ```bash
 cd packages/sdk-python
-python -m venv .venv && source .venv/bin/activate
-pip install -e ".[dev]"
-pytest
-ruff check src/
-mypy src/
+uv sync
+uv run pytest
+uv run ruff check src/
+uv run mypy src/
 ```
+
+`make check` runs the repo's canonical local validation flow: build, lint, SDK typecheck, and tests. The SDK commands are executed through `uv run`.
 
 ## Architecture
 

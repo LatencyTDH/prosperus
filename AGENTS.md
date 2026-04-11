@@ -28,13 +28,12 @@ prosperus/                        # Monorepo root (pnpm workspaces)
 ## Key Commands
 
 ```bash
-# Setup
-pnpm install                          # Install all JS/TS dependencies
-docker compose up postgres -d         # Start PostgreSQL
-pnpm --filter @prosperus/server db:migrate  # Run migrations
+# Start / Stop
+make start                            # One command: install, Postgres, migrate, dev servers
+make stop                             # Kill dev servers + Postgres
 
 # Development
-make dev                              # Start server + web (or use pnpm dev:server / pnpm dev:web)
+make dev                              # Start server + web (assumes setup already done)
 make build                            # Build all packages
 make test                             # Run all tests
 make lint                             # Lint all packages
@@ -42,10 +41,10 @@ make format                           # Format all code
 
 # Python SDK
 cd packages/sdk-python
-pip install -e ".[dev]"
-pytest                                # Run SDK tests
-ruff check src/                       # Lint
-mypy src/                             # Type check
+uv sync
+uv run pytest                         # Run SDK tests
+uv run ruff check src/                # Lint
+uv run mypy src/                      # Type check
 
 # Server-specific
 pnpm --filter @prosperus/server db:generate  # Generate migration from schema changes
@@ -62,11 +61,17 @@ pnpm --filter @prosperus/server db:migrate   # Apply migrations
 - **Frontend:** React 19, TailwindCSS v4, TanStack Query for data fetching
 - **Ports:** API on 4100, web dev server on 4200 (proxies `/v1` to API)
 
+## Documentation
+
+- Keep docs in sync when a change meaningfully affects setup, developer workflow, public APIs, architecture, or user-visible behavior.
+- Do not churn docs for minor refactors, internal-only implementation details, renames with no user impact, or every small code edit.
+- Update only the docs that are actually affected. Prefer the closest source of truth rather than repeating the same note across every document.
+
 ## Testing
 
 | Package | Runner | Command |
 |---|---|---|
-| sdk-python | pytest | `cd packages/sdk-python && pytest` |
+| sdk-python | pytest | `cd packages/sdk-python && uv run pytest` |
 | server | vitest | `pnpm --filter @prosperus/server test` |
 | web | vitest | `pnpm --filter @prosperus/web test` |
 

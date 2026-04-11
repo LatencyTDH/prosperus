@@ -24,6 +24,10 @@ export interface TraceListItem {
   startNs: string;
   spanCount: number;
   hasError: boolean;
+  totalCost: number | null;
+  sessionId: string | null;
+  modelName: string | null;
+  durationMs: number;
 }
 
 export interface SpanRow {
@@ -45,17 +49,25 @@ export interface SpanRow {
   prompt: unknown;
   modelName: string | null;
   modelProvider: string | null;
+  inputCost: number | null;
+  outputCost: number | null;
+  totalCost: number | null;
 }
 
 export interface EvaluationRow {
   id: string;
   spanId: string | null;
+  traceId: string | null;
+  appName: string;
   label: string;
   metricType: string;
   numericValue: number | null;
   stringValue: string | null;
   assessment: string | null;
   reasoning: string | null;
+  tags: Record<string, string>;
+  metadata: Record<string, unknown>;
+  createdAt: string;
 }
 
 export interface MetricsSnapshot {
@@ -65,15 +77,87 @@ export interface MetricsSnapshot {
   avgDurationMs: number;
   totalInputTokens: number;
   totalOutputTokens: number;
-  modelBreakdown: Array<{ model: string; provider: string; count: number }>;
+  totalCost: number;
+  modelBreakdown: Array<{ model: string; provider: string; count: number; cost: number }>;
   spanKindBreakdown: Array<{ kind: string; count: number }>;
+  evaluationBreakdown: Array<{ label: string; avgScore: number | null; count: number }>;
+}
+
+export interface TimeSeriesPoint {
+  bucket: string;
+  traces: number;
+  errors: number;
+  avgDurationMs: number;
+  totalTokens: number;
+  totalCost: number;
+}
+
+export interface SessionListItem {
+  sessionId: string;
+  traceCount: number;
+  spanCount: number;
+  firstSeen: string;
+  lastSeen: string;
+  appName: string;
+}
+
+export interface PromptSummary {
+  id: string;
+  versionCount: number;
+  latestVersion: string;
+  lastUsed: string;
+}
+
+export interface PromptVersion {
+  id: string;
+  version: string;
+  template: string | null;
+  chatTemplate: Array<{ role: string; content: string }> | null;
+  variables: Record<string, string>;
+  tags: Record<string, string>;
+  createdAt: string;
+}
+
+export interface ExperimentRow {
+  id: string;
+  appName: string;
+  name: string;
+  description: string | null;
+  baselineTag: string | null;
+  variantTags: string[];
+  status: string;
+  config: Record<string, unknown>;
+  results: Record<string, unknown> | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AppInfo {
+  appName: string;
+  traceCount: number;
 }
 
 // ── API calls ──────────────────────────────────────────────────────────────
 
-export function fetchTraces(appName?: string) {
-  const params = appName ? `?app_name=${encodeURIComponent(appName)}` : "";
-  return request<{ traces: TraceListItem[] }>(`/traces${params}`);
+export function fetchTraces(params?: {
+  appName?: string;
+  kind?: string;
+  hasError?: boolean;
+  sessionId?: string;
+  search?: string;
+  limit?: number;
+  offset?: number;
+}) {
+  const qs = new URLSearchParams();
+  if (params?.appName) qs.set("app_name", params.appName);
+  if (params?.kind) qs.set("kind", params.kind);
+  if (params?.hasError !== undefined) qs.set("has_error", String(params.hasError));
+  if (params?.sessionId) qs.set("session_id", params.sessionId);
+  if (params?.search) qs.set("search", params.search);
+  if (params?.limit) qs.set("limit", String(params.limit));
+  if (params?.offset) qs.set("offset", String(params.offset));
+  const q = qs.toString();
+  return request<{ traces: TraceListItem[] }>(`/traces${q ? `?${q}` : ""}`);
 }
 
 export function fetchTraceSpans(traceId: string) {
@@ -86,4 +170,55 @@ export function fetchSpanEvaluations(spanId: string) {
 
 export function fetchMetrics(appName: string) {
   return request<MetricsSnapshot>(`/apps/${encodeURIComponent(appName)}/metrics`);
+}
+
+export function fetchTimeSeries(appName: string, periodHours = 24) {
+  return request<{ timeseries: TimeSeriesPoint[] }>(
+    `/apps/${encodeURIComponent(appName)}/timeseries?period_hours=${periodHours}`
+  );
+}
+
+export function fetchSessions(appName?: string) {
+  const qs = appName ? `?app_name=${encodeURIComponent(appName)}` : "";
+  return request<{ sessions: SessionListItem[] }>(`/sessions${qs}`);
+}
+
+export function fetchEvaluations(params?: { appName?: string; label?: string }) {
+  const qs = new URLSearchParams();
+  if (params?.appName) qs.set("app_name", params.appName);
+  if (params?.label) qs.set("label", params.label);
+  const q = qs.toString();
+  return request<{ evaluations: EvaluationRow[] }>(`/evaluations${q ? `?${q}` : ""}`);
+}
+
+export function fetchApps() {
+  return request<{ apps: AppInfo[] }>("/apps");
+}
+
+export function fetchPrompts() {
+  return request<{ prompts: PromptSummary[] }>("/prompts");
+}
+
+export function fetchPromptVersions(promptId: string) {
+  return request<{ versions: PromptVersion[] }>(
+    `/prompts/${encodeURIComponent(promptId)}/versions`
+  );
+}
+
+export function fetchExperiments(appName?: string) {
+  const qs = appName ? `?app_name=${encodeURIComponent(appName)}` : "";
+  return request<{ experiments: ExperimentRow[] }>(`/experiments${qs}`);
+}
+
+export function createExperiment(data: {
+  app_name: string;
+  name: string;
+  description?: string;
+  baseline_tag?: string;
+  variant_tags?: string[];
+}) {
+  return request<{ id: string }>("/experiments", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
 }

@@ -6,23 +6,22 @@ import atexit
 import logging
 import threading
 from collections import deque
+from collections.abc import Iterator
 from contextlib import contextmanager
-from typing import Any, Callable, Iterator, Optional
+from typing import Any, Callable
 
 import httpx
 
 from prosperus.spans import Span, get_active_span
-from prosperus.types import CostMetrics, Evaluation, Prompt, SpanContext, SpanData, SpanKind
+from prosperus.types import SpanContext, SpanData, SpanKind
 
 logger = logging.getLogger("prosperus")
 
-_global_client: Optional[Prosperus] = None
+_global_client: Prosperus | None = None
 _lock = threading.Lock()
 
-SpanProcessor = Callable[[SpanData], Optional[SpanData]]
 
-
-def _get_global() -> Optional[Prosperus]:
+def _get_global() -> Prosperus | None:
     return _global_client
 
 
@@ -42,7 +41,7 @@ class Prosperus:
         app_name: str,
         endpoint: str = "https://ingest.prosperus.dev",
         flush_interval: float = 5.0,
-        span_processor: SpanProcessor | None = None,
+        span_processor: Callable[[SpanData], SpanData | None] | None = None,
     ) -> None:
         self.api_key = api_key
         self.app_name = app_name
@@ -98,15 +97,31 @@ class Prosperus:
         ml_app: str | None = None,
     ) -> Span:
         return Span(
-            SpanKind.LLM, name, self.app_name,
-            model_name=model_name, model_provider=model_provider,
-            session_id=session_id, ml_app=ml_app,
+            SpanKind.LLM,
+            name,
+            self.app_name,
+            model_name=model_name,
+            model_provider=model_provider,
+            session_id=session_id,
+            ml_app=ml_app,
         )
 
-    def workflow(self, name: str = "workflow", *, session_id: str | None = None, ml_app: str | None = None) -> Span:
+    def workflow(
+        self,
+        name: str = "workflow",
+        *,
+        session_id: str | None = None,
+        ml_app: str | None = None,
+    ) -> Span:
         return Span(SpanKind.WORKFLOW, name, self.app_name, session_id=session_id, ml_app=ml_app)
 
-    def agent(self, name: str = "agent", *, session_id: str | None = None, ml_app: str | None = None) -> Span:
+    def agent(
+        self,
+        name: str = "agent",
+        *,
+        session_id: str | None = None,
+        ml_app: str | None = None,
+    ) -> Span:
         return Span(SpanKind.AGENT, name, self.app_name, session_id=session_id, ml_app=ml_app)
 
     def tool(self, name: str = "tool", *, ml_app: str | None = None) -> Span:
@@ -115,8 +130,22 @@ class Prosperus:
     def task(self, name: str = "task", *, ml_app: str | None = None) -> Span:
         return Span(SpanKind.TASK, name, self.app_name, ml_app=ml_app)
 
-    def embedding(self, name: str = "embedding", *, model_name: str = "", model_provider: str = "", ml_app: str | None = None) -> Span:
-        return Span(SpanKind.EMBEDDING, name, self.app_name, model_name=model_name, model_provider=model_provider, ml_app=ml_app)
+    def embedding(
+        self,
+        name: str = "embedding",
+        *,
+        model_name: str = "",
+        model_provider: str = "",
+        ml_app: str | None = None,
+    ) -> Span:
+        return Span(
+            SpanKind.EMBEDDING,
+            name,
+            self.app_name,
+            model_name=model_name,
+            model_provider=model_provider,
+            ml_app=ml_app,
+        )
 
     def retrieval(self, name: str = "retrieval", *, ml_app: str | None = None) -> Span:
         return Span(SpanKind.RETRIEVAL, name, self.app_name, ml_app=ml_app)
@@ -212,7 +241,7 @@ class Prosperus:
 
     # -- span processor ---------------------------------------------------
 
-    def register_processor(self, processor: SpanProcessor) -> None:
+    def register_processor(self, processor: Callable[[SpanData], SpanData | None]) -> None:
         """Register a function that can modify or filter spans before they are sent."""
         self._span_processor = processor
 

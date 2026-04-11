@@ -15,6 +15,8 @@
 
 The SDK instruments user code and sends spans to the API. The API ingests spans and evaluations into PostgreSQL. The dashboard queries the API to display traces, metrics, and evaluations.
 
+For durable rationale behind key structural choices, see the ADRs in [docs/adrs](docs/adrs/README.md).
+
 ## Package Structure
 
 ### `sdk-python` — Python SDK

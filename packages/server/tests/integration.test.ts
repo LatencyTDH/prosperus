@@ -1,12 +1,34 @@
+import postgres from "postgres";
 import { describe, it, expect } from "vitest";
 import { buildServer } from "../src/server.js";
 
 /**
  * Integration tests — require a running PostgreSQL instance.
- * Run with: DATABASE_URL=... pnpm --filter @prosperus/server test
- * Skipped when DATABASE_URL is not set or DB is unreachable.
+ * Run with: DATABASE_URL=... pnpm --filter @prosperus/server db:migrate && pnpm --filter @prosperus/server test
+ * Skipped when DATABASE_URL is not set, DB is unreachable, or migrations have not been applied.
  */
-const hasDatabase = !!process.env.DATABASE_URL;
+async function hasReadyDatabase(): Promise<boolean> {
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) {
+    return false;
+  }
+
+  const sql = postgres(databaseUrl, { max: 1 });
+
+  try {
+    await sql`select 1`;
+    const rows = await sql<{ migrationsApplied: boolean }[]>`
+      select to_regclass('public.spans') is not null as "migrationsApplied"
+    `;
+    return rows[0]?.migrationsApplied ?? false;
+  } catch {
+    return false;
+  } finally {
+    await sql.end({ timeout: 1 });
+  }
+}
+
+const hasDatabase = await hasReadyDatabase();
 
 describe.skipIf(!hasDatabase)("span ingestion integration", () => {
   const testSpan = {
