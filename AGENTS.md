@@ -62,6 +62,12 @@ pnpm --filter @prosperus/server db:migrate   # Apply migrations
 - **Frontend:** React 19, TailwindCSS v4, TanStack Query for data fetching
 - **Ports:** API on 4100, web dev server on 4200 (proxies `/v1` to API)
 
+## Documentation
+
+- Keep docs in sync when a change meaningfully affects setup, developer workflow, public APIs, architecture, or user-visible behavior.
+- Do not churn docs for minor refactors, internal-only implementation details, renames with no user impact, or every small code edit.
+- Update only the docs that are actually affected. Prefer the closest source of truth rather than repeating the same note across every document.
+
 ## Testing
 
 | Package | Runner | Command |
