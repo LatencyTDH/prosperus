@@ -65,6 +65,37 @@ function fmtCost(n: number | null | undefined): string {
   return `$${n.toFixed(2)}`;
 }
 
+function coerceNumeric(value: string | number | Array<string | number> | null | undefined): number | null {
+  if (value == null) return null;
+  const candidate = Array.isArray(value) ? value[0] : value;
+  const numeric = typeof candidate === "number" ? candidate : Number(candidate);
+  return Number.isFinite(numeric) ? numeric : null;
+}
+
+function formatModelUsageTooltip(
+  value: string | number | Array<string | number>,
+  _name: string,
+  entry?: { payload?: { cost?: number | null } },
+): [string, string] {
+  const count = coerceNumeric(value) ?? 0;
+  const cost = entry?.payload?.cost ?? 0;
+  return [`${count} calls · ${fmtCost(cost)}`, "Usage"];
+}
+
+function formatEvaluationTooltip(
+  value: string | number | Array<string | number> | null,
+  name: string,
+): [string, string] {
+  const numeric = coerceNumeric(value);
+  const label = name === "avgScore" ? "Avg Score" : "Count";
+
+  if (name === "avgScore") {
+    return [numeric == null ? "—" : numeric.toFixed(2), label];
+  }
+
+  return [numeric == null ? String(value ?? "—") : String(numeric), label];
+}
+
 function fmtBucket(bucket: string, periodHours: number): string {
   const d = new Date(bucket);
   if (periodHours <= 24) return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -408,10 +439,7 @@ export function DashboardPage({ appName: rawAppName = "" }: { appName?: string }
                     </Pie>
                     <Tooltip
                       contentStyle={TOOLTIP_STYLE}
-                      formatter={(value: number, _name: string, entry: { payload: { cost: number } }) => [
-                        `${value} calls · ${fmtCost(entry.payload.cost)}`,
-                        "Usage",
-                      ]}
+                      formatter={formatModelUsageTooltip}
                     />
                   </PieChart>
                 </ResponsiveContainer>
@@ -467,12 +495,7 @@ export function DashboardPage({ appName: rawAppName = "" }: { appName?: string }
                     <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} width={40} />
                     <Tooltip
                       contentStyle={TOOLTIP_STYLE}
-                      formatter={(value: number | null, name: string) => [
-                        name === "avgScore" && value != null
-                          ? value.toFixed(2)
-                          : String(value ?? "—"),
-                        name === "avgScore" ? "Avg Score" : "Count",
-                      ]}
+                      formatter={formatEvaluationTooltip}
                     />
                     <Legend
                       wrapperStyle={{ fontSize: 11, color: "#a1a1aa" }}

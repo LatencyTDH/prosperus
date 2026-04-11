@@ -1,16 +1,26 @@
-.PHONY: dev build test lint format check setup
+.PHONY: dev build test lint format check setup start stop
 
 # ── Development ──────────────────────────────────────────────────
 
 setup: ## Install dependencies and start PostgreSQL
 	pnpm install
-	pre-commit install
 	docker compose up postgres -d
+	@echo "Waiting for PostgreSQL..."
+	@until docker compose exec postgres pg_isready -U prosperus -q 2>/dev/null; do sleep 0.5; done
 	pnpm --filter @prosperus/server db:migrate
 
 dev: ## Start server and web dev servers
 	@echo "Starting server on :4100 and web on :4200"
 	pnpm dev:server & pnpm dev:web
+
+start: ## One-command cold start: install, DB, migrate, dev servers
+	@$(MAKE) setup
+	@$(MAKE) dev
+
+stop: ## Stop dev servers and PostgreSQL
+	-@pkill -f "tsx watch src/index.ts" 2>/dev/null
+	-@pkill -f "vite" 2>/dev/null
+	docker compose down
 
 # ── Quality ──────────────────────────────────────────────────────
 

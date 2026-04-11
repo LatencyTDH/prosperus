@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { fetchApps, type AppInfo } from "../api/client";
+import { fetchApps } from "../api/client";
 import { useState } from "react";
 
 // Simple inline SVG icons

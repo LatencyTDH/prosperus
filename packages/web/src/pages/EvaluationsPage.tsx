@@ -12,6 +12,8 @@ const MANAGED_EVALS = [
   "prompt injection",
 ];
 
+const EMPTY_EVALUATIONS: EvaluationRow[] = [];
+
 function AssessmentBadge({ value }: { value: string | null }) {
   if (!value) return <span className="text-zinc-600">—</span>;
   const pass = value.toLowerCase() === "pass";
@@ -131,7 +133,7 @@ export function EvaluationsPage({ appName }: { appName: string }) {
       }),
   });
 
-  const evaluations = data?.evaluations ?? [];
+  const evaluations = data?.evaluations ?? EMPTY_EVALUATIONS;
 
   const labels = useMemo(() => {
     const set = new Set<string>();
@@ -305,7 +307,7 @@ export function EvaluationsPage({ appName }: { appName: string }) {
                     <AssessmentBadge value={row.assessment} />
                   </td>
                   <td
-                    className="px-4 py-2 text-zinc-500 text-xs max-w-[240px] truncate"
+                    className="px-4 py-2 text-zinc-500 text-xs max-w-60 truncate"
                     title={row.reasoning ?? undefined}
                   >
                     {truncate(row.reasoning, 80)}

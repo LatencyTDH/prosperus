@@ -9,8 +9,6 @@ import {
   varchar,
   pgEnum,
   primaryKey,
-  boolean,
-  integer,
 } from "drizzle-orm/pg-core";
 
 export const spanKindEnum = pgEnum("span_kind", [

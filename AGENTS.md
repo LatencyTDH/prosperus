@@ -28,13 +28,12 @@ prosperus/                        # Monorepo root (pnpm workspaces)
 ## Key Commands
 
 ```bash
-# Setup
-pnpm install                          # Install all JS/TS dependencies
-docker compose up postgres -d         # Start PostgreSQL
-pnpm --filter @prosperus/server db:migrate  # Run migrations
+# Start / Stop
+make start                            # One command: install, Postgres, migrate, dev servers
+make stop                             # Kill dev servers + Postgres
 
 # Development
-make dev                              # Start server + web (or use pnpm dev:server / pnpm dev:web)
+make dev                              # Start server + web (assumes setup already done)
 make build                            # Build all packages
 make test                             # Run all tests
 make lint                             # Lint all packages

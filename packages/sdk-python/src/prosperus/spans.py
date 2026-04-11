@@ -5,11 +5,11 @@ from __future__ import annotations
 import contextvars
 import time
 import uuid
-from typing import Any, Optional
+from typing import Any
 
 from prosperus.types import SpanContext, SpanData, SpanKind
 
-_active_span: contextvars.ContextVar[Optional[Span]] = contextvars.ContextVar(
+_active_span: contextvars.ContextVar[Span | None] = contextvars.ContextVar(
     "prosperus_active_span", default=None
 )
 
@@ -138,6 +138,7 @@ class Span:
             self._token = None
         # Notify the global client to enqueue this span
         from prosperus.client import _get_global
+
         client = _get_global()
         if client is not None:
             client._enqueue_span(self)

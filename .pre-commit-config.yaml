@@ -32,7 +32,7 @@ repos:
       # TypeScript / JavaScript: eslint
       - id: eslint
         name: eslint
-        entry: ./node_modules/.bin/eslint --fix
+        entry: bash scripts/run-eslint-hook.sh
         language: system
         files: ^packages/(server|web)/src/.*\.(ts|tsx|js|jsx)$
         require_serial: true

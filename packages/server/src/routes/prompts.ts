@@ -1,5 +1,4 @@
 import type { FastifyInstance } from "fastify";
-import { z } from "zod";
 import { desc, eq, sql } from "drizzle-orm";
 import { db } from "../db/connection.js";
 import { prompts } from "../db/schema.js";

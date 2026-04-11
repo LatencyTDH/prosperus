@@ -33,26 +33,27 @@ Prosperus collects traces, spans, evaluations, and metrics from your LLM applica
 ### Setup
 
 ```bash
-# Clone and install dependencies
-git clone https://github.com/prosperus-dev/prosperus.git
+git clone https://github.com/LatencyTDH/prosperus.git
 cd prosperus
-pnpm install
-
-# Start PostgreSQL
-docker compose up postgres -d
-
-# Run database migrations
-pnpm --filter @prosperus/server db:migrate
-
-# Start development servers
-pnpm dev:server   # API on http://localhost:4100
-pnpm dev:web      # Dashboard on http://localhost:4200
+make start    # installs deps, starts Postgres, migrates, launches dev servers
 ```
 
-Or run everything with Docker Compose:
+That's it. API on http://localhost:4100, dashboard on http://localhost:4200.
+
+To stop everything:
 
 ```bash
-docker compose up
+make stop
+```
+
+Or run each step manually:
+
+```bash
+pnpm install
+docker compose up postgres -d
+pnpm --filter @prosperus/server db:migrate
+pnpm dev:server   # API
+pnpm dev:web      # Dashboard
 ```
 
 ### Verify It Works

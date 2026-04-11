@@ -8,6 +8,8 @@ import {
 } from "../api/client";
 import { useState, useMemo } from "react";
 
+const EMPTY_SPANS: SpanRow[] = [];
+
 // ── Kind colors (matches TracesPage) ───────────────────────────────────────
 
 const KIND_COLORS: Record<string, string> = {
@@ -362,7 +364,7 @@ export function TraceDetailPage() {
     enabled: !!traceId,
   });
 
-  const spans = data?.spans ?? [];
+  const spans = data?.spans ?? EMPTY_SPANS;
 
   const flatNodes = useMemo(() => {
     if (spans.length === 0) return [];

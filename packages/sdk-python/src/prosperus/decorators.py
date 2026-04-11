@@ -5,7 +5,7 @@ from __future__ import annotations
 import functools
 from typing import Any, Callable, TypeVar
 
-from prosperus.spans import Span, get_active_span
+from prosperus.spans import Span
 from prosperus.types import SpanKind
 
 F = TypeVar("F", bound=Callable[..., Any])
