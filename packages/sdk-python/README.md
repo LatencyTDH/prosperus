@@ -26,7 +26,7 @@ ph.enable()
 def handle_request(user_msg: str) -> str:
     return call_model(user_msg)
 
-@llm(model_name="gpt-4o", model_provider="openai")
+@llm(model_name="gpt-5.4", model_provider="openai")
 def call_model(prompt: str) -> str:
     reply = f"Echo: {prompt}"
     Prosperus.annotate(

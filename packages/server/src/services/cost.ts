@@ -15,7 +15,7 @@ interface TokenPricing {
 // Prices in USD per million tokens — a subset for demonstration
 const PRICING: Record<string, Record<string, TokenPricing>> = {
   openai: {
-    "gpt-4o": { inputPerMillion: 2.5, outputPerMillion: 10 },
+    "gpt-5.4": { inputPerMillion: 2.5, outputPerMillion: 10 },
     "gpt-4o-mini": { inputPerMillion: 0.15, outputPerMillion: 0.6 },
     "gpt-4.1": { inputPerMillion: 2.0, outputPerMillion: 8.0 },
     "o3-mini": { inputPerMillion: 1.1, outputPerMillion: 4.4 },
@@ -39,7 +39,7 @@ export interface CostResult {
 export function estimateCost(
   modelProvider: string,
   modelName: string,
-  metrics: Record<string, number>
+  metrics: Record<string, number>,
 ): CostResult | null {
   // If user provided explicit cost metrics, use those
   if (metrics.input_cost != null && metrics.output_cost != null) {

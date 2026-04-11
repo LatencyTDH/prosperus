@@ -1,5 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { Sidebar } from "../src/components/Sidebar";
@@ -24,13 +31,22 @@ function jsonResponse(body: unknown, status = 200) {
   };
 }
 
-function installFetchMock(handler: (url: URL, init?: RequestInit) => unknown | Promise<unknown>) {
-  const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
-    const raw = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
-    const url = new URL(raw, "http://localhost");
-    const body = await handler(url, init);
-    return jsonResponse(body);
-  });
+function installFetchMock(
+  handler: (url: URL, init?: RequestInit) => unknown | Promise<unknown>,
+) {
+  const fetchMock = vi.fn(
+    async (input: string | URL | Request, init?: RequestInit) => {
+      const raw =
+        typeof input === "string"
+          ? input
+          : input instanceof URL
+            ? input.toString()
+            : input.url;
+      const url = new URL(raw, "http://localhost");
+      const body = await handler(url, init);
+      return jsonResponse(body);
+    },
+  );
 
   vi.stubGlobal("fetch", fetchMock);
   return fetchMock;
@@ -52,7 +68,7 @@ function renderWithProviders(ui: React.ReactNode, route = "/") {
   const rendered = render(
     <QueryClientProvider client={client}>
       <MemoryRouter initialEntries={[route]}>{ui}</MemoryRouter>
-    </QueryClientProvider>
+    </QueryClientProvider>,
   );
 
   return { ...rendered, client };
@@ -76,7 +92,7 @@ function buildSpan(overrides: Partial<SpanRow> = {}): SpanRow {
     error: null,
     sessionId: "session-1",
     prompt: { id: "order.status", version: "v1" },
-    modelName: "gpt-4o",
+    modelName: "gpt-5.4",
     modelProvider: "openai",
     inputCost: 0.01,
     outputCost: 0.02,
@@ -108,11 +124,13 @@ describe("dashboard UI behavior", () => {
     });
 
     const view = renderWithProviders(
-      <Sidebar selectedApp="" onSelectApp={onSelectApp} />
+      <Sidebar selectedApp="" onSelectApp={onSelectApp} />,
     );
 
     const select = await screen.findByRole("combobox");
-    expect(await screen.findByRole("option", { name: "shop-bot (12)" })).toBeTruthy();
+    expect(
+      await screen.findByRole("option", { name: "shop-bot (12)" }),
+    ).toBeTruthy();
 
     fireEvent.change(select, { target: { value: "support-bot" } });
     expect(onSelectApp).toHaveBeenCalledWith("support-bot");
@@ -135,7 +153,9 @@ describe("dashboard UI behavior", () => {
           totalInputTokens: 1000,
           totalOutputTokens: 400,
           totalCost: 12.5,
-          modelBreakdown: [{ model: "gpt-4o", provider: "openai", count: 10, cost: 12.5 }],
+          modelBreakdown: [
+            { model: "gpt-5.4", provider: "openai", count: 10, cost: 12.5 },
+          ],
           spanKindBreakdown: [{ kind: "llm", count: 30 }],
           evaluationBreakdown: [{ label: "toxicity", avgScore: 0.1, count: 6 }],
         };
@@ -191,7 +211,7 @@ describe("trace exploration behavior", () => {
       hasError: index % 3 === 0,
       totalCost: index % 2 === 0 ? 0.5 : null,
       sessionId: `session-${index}`,
-      modelName: "gpt-4o",
+      modelName: "gpt-5.4",
       durationMs: 250,
     }));
 
@@ -299,11 +319,13 @@ describe("trace exploration behavior", () => {
       <Routes>
         <Route path="/traces/:traceId" element={<TraceDetailPage />} />
       </Routes>,
-      "/traces/trace-1"
+      "/traces/trace-1",
     );
 
     expect(await screen.findByText("Trace ID")).toBeTruthy();
-    expect(screen.getByText("Click a span in the waterfall to view details")).toBeTruthy();
+    expect(
+      screen.getByText("Click a span in the waterfall to view details"),
+    ).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: /call model/i }));
 
@@ -328,7 +350,10 @@ describe("trace exploration behavior", () => {
 describe("supporting pages", () => {
   it("renders evaluations, lets the user filter by label, and shows an empty state", async () => {
     const fetchMock = installFetchMock((url) => {
-      if (url.pathname === "/v1/evaluations" && url.searchParams.get("label") === "toxicity") {
+      if (
+        url.pathname === "/v1/evaluations" &&
+        url.searchParams.get("label") === "toxicity"
+      ) {
         return {
           evaluations: [
             {
@@ -391,7 +416,7 @@ describe("supporting pages", () => {
     });
 
     const loaded = renderWithProviders(<EvaluationsPage appName="shop-bot" />);
-    expect(await screen.findByText("50.0%")) .toBeTruthy();
+    expect(await screen.findByText("50.0%")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "toxicity" }));
     expect(await screen.findByText("Avg toxicity")).toBeTruthy();
     await waitFor(() => {
@@ -469,7 +494,9 @@ describe("supporting pages", () => {
     fireEvent.change(selects[0], { target: { value: "0" } });
     fireEvent.change(selects[1], { target: { value: "1" } });
 
-    expect(screen.getAllByText("Check the latest order state.").length).toBeGreaterThan(0);
+    expect(
+      screen.getAllByText("Check the latest order state.").length,
+    ).toBeGreaterThan(0);
     expect(screen.getAllByText("Check order state.").length).toBeGreaterThan(0);
 
     view.client.clear();
@@ -521,7 +548,9 @@ describe("supporting pages", () => {
           totalInputTokens: 1000,
           totalOutputTokens: 400,
           totalCost: 12.5,
-          modelBreakdown: [{ model: "gpt-4o", provider: "openai", count: 10, cost: 12.5 }],
+          modelBreakdown: [
+            { model: "gpt-5.4", provider: "openai", count: 10, cost: 12.5 },
+          ],
           spanKindBreakdown: [{ kind: "llm", count: 30 }],
           evaluationBreakdown: [],
         };
@@ -577,11 +606,12 @@ describe("supporting pages", () => {
       throw new Error(`Unhandled URL: ${url.pathname}${url.search}`);
     });
 
-    const experimentsView = renderWithProviders(<ExperimentsPage appName="shop-bot" />);
+    const experimentsView = renderWithProviders(
+      <ExperimentsPage appName="shop-bot" />,
+    );
     expect(await screen.findByText("Checkout prompt A/B")).toBeTruthy();
     expect(screen.getByText("baseline")).toBeTruthy();
     experimentsView.client.clear();
-
   });
 
   it("renders cost charts and lets the user change the reporting window", async () => {
@@ -595,7 +625,9 @@ describe("supporting pages", () => {
           totalInputTokens: 1000,
           totalOutputTokens: 400,
           totalCost: 12.5,
-          modelBreakdown: [{ model: "gpt-4o", provider: "openai", count: 10, cost: 12.5 }],
+          modelBreakdown: [
+            { model: "gpt-5.4", provider: "openai", count: 10, cost: 12.5 },
+          ],
           spanKindBreakdown: [{ kind: "llm", count: 30 }],
           evaluationBreakdown: [],
         };
@@ -627,7 +659,9 @@ describe("supporting pages", () => {
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith(
-        expect.stringContaining("/v1/apps/shop-bot/timeseries?period_hours=720"),
+        expect.stringContaining(
+          "/v1/apps/shop-bot/timeseries?period_hours=720",
+        ),
         expect.anything(),
       );
     });
@@ -654,7 +688,7 @@ describe("shared span components", () => {
         ]}
         selectedSpanId={null}
         onSelect={onSelect}
-      />
+      />,
     );
 
     fireEvent.click(screen.getByRole("button", { name: /call model/i }));
@@ -670,7 +704,7 @@ describe("shared span components", () => {
           name: "call model",
           error: { type: "Timeout", message: "model timed out" },
         })}
-      />
+      />,
     );
 
     expect(screen.getByText("call model")).toBeTruthy();

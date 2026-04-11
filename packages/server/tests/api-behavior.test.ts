@@ -51,7 +51,9 @@ function queueSelectResults(...results: unknown[][]) {
   queuedSelectResults.push(...results);
 }
 
-async function withServer(run: (app: Awaited<ReturnType<typeof buildServer>>) => Promise<void>) {
+async function withServer(
+  run: (app: Awaited<ReturnType<typeof buildServer>>) => Promise<void>,
+) {
   const app = await buildServer();
   try {
     await run(app);
@@ -90,7 +92,7 @@ describe("public API behavior", () => {
                 version: "v3",
                 template: "Answer the user clearly.",
               },
-              model_name: "gpt-4o",
+              model_name: "gpt-5.4",
               model_provider: "openai",
             },
           ],
@@ -101,10 +103,15 @@ describe("public API behavior", () => {
       expect(res.json()).toEqual({ ingested: 1 });
       expect(insertCalls).toHaveLength(2);
 
-      const promptInsert = insertCalls[0].rows as Array<Record<string, unknown>>;
+      const promptInsert = insertCalls[0].rows as Array<
+        Record<string, unknown>
+      >;
       const spanInsert = insertCalls[1].rows as Array<Record<string, unknown>>;
 
-      expect(promptInsert[0]).toMatchObject({ id: "support.answer", version: "v3" });
+      expect(promptInsert[0]).toMatchObject({
+        id: "support.answer",
+        version: "v3",
+      });
       expect(spanInsert[0]).toMatchObject({
         spanId: "span-1",
         traceId: "trace-1",
@@ -125,7 +132,7 @@ describe("public API behavior", () => {
           startNs: 1700000000000000000n,
           endNs: 1700000000500000000n,
           sessionId: "session-1",
-          modelName: "gpt-4o",
+          modelName: "gpt-5.4",
         },
       ],
       [
@@ -158,7 +165,7 @@ describe("public API behavior", () => {
             hasError: true,
             totalCost: 1.25,
             sessionId: "session-1",
-            modelName: "gpt-4o",
+            modelName: "gpt-5.4",
             durationMs: 500,
           },
         ],
@@ -221,7 +228,7 @@ describe("public API behavior", () => {
           error: { type: "Timeout", message: "model timed out" },
           sessionId: "session-1",
           prompt: { id: "order.status", version: "v1" },
-          modelName: "gpt-4o",
+          modelName: "gpt-5.4",
           modelProvider: "openai",
           inputCost: 0.01,
           outputCost: 0.02,
@@ -270,7 +277,11 @@ describe("public API behavior", () => {
       expect(evalRes.statusCode).toBe(200);
       expect(evalRes.json()).toEqual({
         evaluations: [
-          expect.objectContaining({ id: "eval-1", label: "toxicity", assessment: "pass" }),
+          expect.objectContaining({
+            id: "eval-1",
+            label: "toxicity",
+            assessment: "pass",
+          }),
         ],
       });
     });
@@ -315,7 +326,10 @@ describe("public API behavior", () => {
         headers: { authorization: "Bearer test-key" },
       });
       expect(sessionRes.statusCode).toBe(200);
-      expect(sessionRes.json().sessions[0]).toMatchObject({ sessionId: "session-1", spanCount: 7 });
+      expect(sessionRes.json().sessions[0]).toMatchObject({
+        sessionId: "session-1",
+        spanCount: 7,
+      });
 
       const evalRes = await app.inject({
         method: "GET",
@@ -331,7 +345,9 @@ describe("public API behavior", () => {
         headers: { authorization: "Bearer test-key" },
       });
       expect(appsRes.statusCode).toBe(200);
-      expect(appsRes.json()).toEqual({ apps: [{ appName: "shop-bot", traceCount: 12 }] });
+      expect(appsRes.json()).toEqual({
+        apps: [{ appName: "shop-bot", traceCount: 12 }],
+      });
     });
   });
 
@@ -362,7 +378,10 @@ describe("public API behavior", () => {
               metric_type: "score",
               value: 0.1,
               app_name: "shop-bot",
-              span_with_tag_value: { tag_key: "order_id", tag_value: "ord_123" },
+              span_with_tag_value: {
+                tag_key: "order_id",
+                tag_value: "ord_123",
+              },
               assessment: "pass",
             },
           ],
@@ -408,7 +427,7 @@ describe("public API behavior", () => {
           totalCost: 3.5,
         },
       ],
-      [{ model: "gpt-4o", provider: "openai", count: 4, cost: 3.5 }],
+      [{ model: "gpt-5.4", provider: "openai", count: 4, cost: 3.5 }],
       [{ kind: "llm", count: 4 }],
       [{ label: "toxicity", avgScore: 0.1, count: 2 }],
       [
@@ -435,7 +454,9 @@ describe("public API behavior", () => {
         totalSpans: 6,
         errorRate: 1 / 6,
         totalCost: 3.5,
-        modelBreakdown: [{ model: "gpt-4o", provider: "openai", count: 4, cost: 3.5 }],
+        modelBreakdown: [
+          { model: "gpt-5.4", provider: "openai", count: 4, cost: 3.5 },
+        ],
       });
 
       const timeseriesRes = await app.inject({
@@ -501,7 +522,10 @@ describe("public API behavior", () => {
         headers: { authorization: "Bearer test-key" },
       });
       expect(listRes.statusCode).toBe(200);
-      expect(listRes.json().prompts[0]).toMatchObject({ id: "order.status", versionCount: 2 });
+      expect(listRes.json().prompts[0]).toMatchObject({
+        id: "order.status",
+        versionCount: 2,
+      });
 
       const versionsRes = await app.inject({
         method: "GET",
@@ -509,7 +533,10 @@ describe("public API behavior", () => {
         headers: { authorization: "Bearer test-key" },
       });
       expect(versionsRes.statusCode).toBe(200);
-      expect(versionsRes.json().versions[0]).toMatchObject({ version: "v2", template: "Check order state" });
+      expect(versionsRes.json().versions[0]).toMatchObject({
+        version: "v2",
+        template: "Check order state",
+      });
     });
   });
 
@@ -576,7 +603,10 @@ describe("public API behavior", () => {
         headers: { authorization: "Bearer test-key" },
       });
       expect(detailRes.statusCode).toBe(200);
-      expect(detailRes.json().experiment).toMatchObject({ id: "exp-1", name: "Checkout prompt A/B" });
+      expect(detailRes.json().experiment).toMatchObject({
+        id: "exp-1",
+        name: "Checkout prompt A/B",
+      });
     });
   });
 

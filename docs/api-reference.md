@@ -45,7 +45,7 @@ Ingest a batch of spans (max 1000 per request).
       "tags": { "env": "production" },
       "error": null,
       "session_id": null,
-      "model_name": "gpt-4o",
+      "model_name": "gpt-5.4",
       "model_provider": "openai"
     }
   ]
@@ -204,7 +204,7 @@ Returns aggregated metrics for an application.
     "output": 1800000
   },
   "modelBreakdown": {
-    "gpt-4o": 820,
+    "gpt-5.4": 820,
     "claude-3.5-sonnet": 430
   },
   "estimatedCost": 142.50

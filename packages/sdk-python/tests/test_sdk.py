@@ -41,7 +41,7 @@ class TestSpanLifecycle:
 
         with (
             ph.workflow("outer") as outer,
-            ph.llm("inner", model_name="gpt-4o", model_provider="openai") as inner,
+            ph.llm("inner", model_name="gpt-5.4", model_provider="openai") as inner,
         ):
             assert inner.parent_id == outer.span_id
             assert inner.trace_id == outer.trace_id
@@ -106,7 +106,7 @@ class TestDecorators:
         ph = Prosperus(api_key="test", app_name="test-app")
         ph.enable()
 
-        @llm(model_name="gpt-4o", model_provider="openai")
+        @llm(model_name="gpt-5.4", model_provider="openai")
         def call_model() -> str:
             return "response"
 

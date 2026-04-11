@@ -34,7 +34,7 @@ ph.enable()
 def handle_request(user_msg: str) -> str:
     return call_model(user_msg)
 
-@llm(model_name="gpt-4o", model_provider="openai")
+@llm(model_name="gpt-5.4", model_provider="openai")
 def call_model(prompt: str) -> str:
     reply = f"Echo: {prompt}"
     Prosperus.annotate(
@@ -75,7 +75,7 @@ from prosperus import llm, tool
 def generate(prompt: str) -> str: ...
 
 # Parameterized — set model info and custom name
-@llm(model_name="gpt-4o", model_provider="openai")
+@llm(model_name="gpt-5.4", model_provider="openai")
 def generate(prompt: str) -> str: ...
 ```
 
@@ -88,7 +88,7 @@ ph = Prosperus(api_key="ph-...", app_name="my-app")
 ph.enable()
 
 with ph.workflow("process-request") as span:
-    with ph.llm("call-model", model_name="gpt-4o", model_provider="openai") as child:
+    with ph.llm("call-model", model_name="gpt-5.4", model_provider="openai") as child:
         # child.parent_id is automatically set to span.span_id
         pass
 ```
@@ -102,9 +102,9 @@ Add input/output data, metadata, metrics, and tags to the active span:
 ```python
 from prosperus import Prosperus, llm
 
-@llm(model_name="gpt-4o", model_provider="openai")
+@llm(model_name="gpt-5.4", model_provider="openai")
 def call_model(messages):
-    response = openai.chat.completions.create(model="gpt-4o", messages=messages)
+    response = openai.chat.completions.create(model="gpt-5.4", messages=messages)
 
     Prosperus.annotate(
         input_data=messages,
@@ -125,7 +125,7 @@ def call_model(messages):
 Export a span reference for cross-process linking or attaching evaluations later:
 
 ```python
-with ph.llm("generate", model_name="gpt-4o") as span:
+with ph.llm("generate", model_name="gpt-5.4") as span:
     ctx = Prosperus.export_span()
     # ctx.trace_id and ctx.span_id can be sent to another service
     # or stored for later evaluation attachment

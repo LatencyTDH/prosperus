@@ -47,7 +47,7 @@ describe.skipIf(!hasDatabase)("span ingestion integration", () => {
     tags: { suite: "integration" },
     error: null,
     session_id: null,
-    model_name: "gpt-4o",
+    model_name: "gpt-5.4",
     model_provider: "openai",
   };
 
@@ -116,7 +116,9 @@ describe.skipIf(!hasDatabase)("span ingestion integration", () => {
     const { spans } = traceRes.json();
     expect(spans).toHaveLength(2);
 
-    const childSpan = spans.find((s: { spanId: string }) => s.spanId === "span-child-002");
+    const childSpan = spans.find(
+      (s: { spanId: string }) => s.spanId === "span-child-002",
+    );
     expect(childSpan).toBeDefined();
     expect(childSpan.parentId).toBe("span-parent-002");
   });
