@@ -5,10 +5,12 @@ Instrument your LLM applications with traces, spans, evaluations, and metrics.
 Install with:
 
 ```bash
-uv add prosperus-sdk
+pip install prosperus
+# or
+uv add prosperus
 ```
 
-The distribution name is `prosperus-sdk`. The Python import package is `prosperus`.
+The distribution name and the Python import package are both `prosperus`.
 
 ## Quick Start
 

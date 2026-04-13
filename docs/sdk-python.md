@@ -5,10 +5,12 @@ The Prosperus Python SDK instruments LLM applications with automatic tracing, sp
 ## Installation
 
 ```bash
-uv add prosperus-sdk
+pip install prosperus
+# or
+uv add prosperus
 ```
 
-The package installs as `prosperus-sdk` and is imported as `prosperus`.
+The package installs and imports as `prosperus`.
 
 For development:
 
