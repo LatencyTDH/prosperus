@@ -3,15 +3,34 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "prosperus-sdk"
+name = "prosperus"
 version = "0.1.0"
 description = "Python SDK for Prosperus LLM Observability"
 readme = "README.md"
 requires-python = ">=3.9"
 license = "Apache-2.0"
+keywords = ["llm", "observability", "tracing", "agents", "evaluations"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
 dependencies = [
     "httpx>=0.27",
 ]
+
+[project.urls]
+Homepage = "https://github.com/LatencyTDH/prosperus"
+Documentation = "https://github.com/LatencyTDH/prosperus/tree/main/docs"
+Issues = "https://github.com/LatencyTDH/prosperus/issues"
+Repository = "https://github.com/LatencyTDH/prosperus"
 
 [dependency-groups]
 dev = [

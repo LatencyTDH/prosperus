@@ -73,3 +73,20 @@ jobs:
       - run: uv run ruff check src/
       - run: uv run mypy src/
       - run: uv run pytest
+      - run: uv build
+      - run: |
+          python -m venv .wheel-smoke
+          . .wheel-smoke/bin/activate
+          pip install --upgrade pip
+          pip install dist/*.whl
+          python - <<'PY'
+          import prosperus
+          from prosperus import Prosperus, llm, workflow, tool
+
+          assert prosperus.__version__ == "0.1.0"
+          assert Prosperus is not None
+          assert callable(llm)
+          assert callable(workflow)
+          assert callable(tool)
+          print("wheel smoke test passed")
+          PY

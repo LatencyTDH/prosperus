@@ -92,12 +92,23 @@ pnpm dev:web
 
 ### Python SDK
 
+Install the SDK from PyPI:
+
+```bash
+pip install prosperus
+# or
+uv add prosperus
+```
+
+For local development:
+
 ```bash
 cd packages/sdk-python
 uv sync
 uv run pytest
 uv run ruff check src/
 uv run mypy src/
+uv build
 ```
 
 `make check` runs the repo's canonical local validation flow: build, lint, SDK typecheck, and tests. The SDK commands are executed through `uv run`.
